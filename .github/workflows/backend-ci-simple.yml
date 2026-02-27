@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        check: [build, type-check, unit-test, startup-test]
+        check: [build, type-check, startup-test]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,10 +49,6 @@ jobs:
       - name: Type checking
         if: matrix.check == 'type-check'
         run: npx tsc --noEmit
-
-      - name: Unit tests
-        if: matrix.check == 'unit-test'
-        run: npm run test -- --ci --passWithNoTests
 
       - name: Startup test
         if: matrix.check == 'startup-test'

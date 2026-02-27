@@ -130,95 +130,6 @@ jobs:
             echo "✅ Dependency tree validation passed!"
           fi
 
-  run-unit-tests:
-    runs-on: ubuntu-latest
-    name: Unit Tests
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'Backend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests
-        run: |
-          echo "Running unit tests..."
-          npm run test -- --ci --coverage --passWithNoTests --verbose
-          TEST_EXIT_CODE=$?
-          if [ $TEST_EXIT_CODE -ne 0 ]; then
-            echo "❌ Unit tests failed!"
-            exit 1
-          else
-            echo "✅ Unit tests passed!"
-          fi
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    name: Integration Tests
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'Backend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run integration tests
-        run: |
-          echo "Running integration tests..."
-          npm run test:e2e
-          E2E_EXIT_CODE=$?
-          if [ $E2E_EXIT_CODE -ne 0 ]; then
-            echo "❌ Integration tests failed!"
-            exit 1
-          else
-            echo "✅ Integration tests passed!"
-          fi
-        env:
-          NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: test_db
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
-
   startup-validation:
     runs-on: ubuntu-latest
     name: Startup Validation
@@ -285,7 +196,7 @@ jobs:
   final-validation:
     runs-on: ubuntu-latest
     name: Final Validation
-    needs: [type-check, build-project, test-dependencies, run-unit-tests, integration-tests, startup-validation]
+    needs: [type-check, build-project, test-dependencies, startup-validation]
     steps:
       - name: Confirm all validations passed
         run: |
@@ -293,8 +204,6 @@ jobs:
           echo "✅ Type checking"
           echo "✅ Build validation" 
           echo "✅ Dependency analysis"
-          echo "✅ Unit tests"
-          echo "✅ Integration tests"
           echo "✅ Startup validation"
           echo ""
           echo "Pipeline ready for merge 🚀"

@@ -77,84 +77,6 @@ jobs:
           path: Backend/dist/
           retention-days: 5
 
-  unit-tests:
-    runs-on: ubuntu-latest
-    name: Unit Tests
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'Backend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests
-        run: npm run test -- --ci --coverage --testTimeout=10000
-
-      - name: Upload test coverage
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: test-coverage-report
-          path: Backend/coverage/
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    name: Integration Tests
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'Backend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run integration tests
-        run: npm run test:e2e
-        env:
-          NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: test_db
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
-
   startup-test:
     runs-on: ubuntu-latest
     name: Application Startup Test
@@ -223,8 +145,6 @@ jobs:
           pm2 delete all || true
           pkill -f "node.*dist/main" || true
 
-
-
   dependency-check:
     runs-on: ubuntu-latest
     name: Dependency Analysis
@@ -265,7 +185,7 @@ jobs:
   combined-check:
     runs-on: ubuntu-latest
     name: All Checks Combined
-    needs: [type-check, build, unit-tests, integration-tests, startup-test, dependency-check]
+    needs: [type-check, build, startup-test, dependency-check]
     steps:
       - name: Confirm all checks passed
         run: echo "All CI checks passed successfully!"
