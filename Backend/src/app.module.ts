@@ -13,6 +13,8 @@ import { RateLimitModule } from './rate-limiting/rate-limit.module';
 import { SessionModule } from './sessions/session.module';
 import { LifecycleModule } from './lifecycle/lifecycle.module';
 import { IndexAnalysisModule } from './index-analysis/index-analysis.module';
+import { ErrorHandlingModule } from './common/error-handling.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { IndexAnalysisModule } from './index-analysis/index-analysis.module';
     IndexAnalysisModule,
     AuthModule,
     WebsocketModule,
+    // Backup and disaster recovery module
+    BackupModule,
   ],
   controllers: [AppController],
   providers: [AppService],
