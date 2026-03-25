@@ -11,7 +11,9 @@ use soroban_sdk::{
 // Use the auto-generated client from #[contractimpl]
 use crate::UpgradeableTradingContractClient;
 
-fn setup_contract(env: &Env) -> (UpgradeableTradingContractClient, Address, Address, Address) {
+fn setup_contract(
+    env: &Env,
+) -> (UpgradeableTradingContractClient<'_>, Address, Address, Address) {
     let contract_id = env.register_contract(None, UpgradeableTradingContract);
     let client = UpgradeableTradingContractClient::new(env, &contract_id);
 
