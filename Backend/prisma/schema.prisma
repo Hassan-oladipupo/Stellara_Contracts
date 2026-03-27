@@ -1394,3 +1394,24 @@ model CdpConsent {
   @@index([userId])
   @@map("cdp_consents")
 }
+
+// Audit Log Model
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?  @map("user_id")
+  action      String   // CONSENT_UPDATE, SEGMENT_CHANGE, etc.
+  entityType  String   @map("entity_type") // CDP_CONSENT, CDP_SEGMENT, etc.
+  entityId    String   @map("entity_id")
+  oldValue    Json?    @map("old_value")
+  newValue    Json?    @map("new_value")
+  metadata    Json?    // Additional context
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
